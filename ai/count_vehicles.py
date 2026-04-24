@@ -5,7 +5,19 @@ import numpy as np
 from database import init_db, insert_log
 from datetime import datetime
 import os
+import easyocr
 
+reader = easyocr.Reader(['en'])
+
+def read_plate(image):
+    results = reader.readtext(image)
+    
+    if len(results) == 0:
+        return "UNKNOWN"
+    
+    # en yüksek güvenli sonucu al
+    best = max(results, key=lambda x: x[2])
+    return best[1]
 # DB ve klasör hazırlığı
 init_db()
 os.makedirs("snapshots", exist_ok=True)
@@ -137,7 +149,9 @@ while True:
                     else:
                         image_path = None
 
-                    insert_log(cls_name, "Gelis", timestamp, image_path)
+                    plate = read_plate(vehicle_crop)
+                    print("PLAKA:", plate)
+                    insert_log(cls_name, "Gelis", timestamp, plate, image_path)
 
         else:
             color = (255, 0, 0)
@@ -171,7 +185,9 @@ while True:
                     else:
                         image_path = None
 
-                    insert_log(cls_name, "Gidis", timestamp, image_path)
+                    plate = read_plate(vehicle_crop)
+                    print("PLAKA:", plate)
+                    insert_log(cls_name, "Gidis", timestamp, plate, image_path)
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
         cv2.circle(frame, center, 4, (0, 0, 255), -1)

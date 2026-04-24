@@ -12,6 +12,7 @@ def init_db():
         timestamp TEXT NOT NULL,
         vehicle_type TEXT NOT NULL,
         direction TEXT NOT NULL,
+        plate TEXT,
         image_path TEXT
     )
     """)
@@ -20,14 +21,14 @@ def init_db():
     conn.close()
 
 
-def insert_log(vehicle_type, direction, timestamp, image_path):
+def insert_log(vehicle_type, direction, timestamp, plate, image_path):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
     cur.execute("""
-    INSERT INTO vehicle_logs (timestamp, vehicle_type, direction, image_path)
-    VALUES (?, ?, ?, ?)
-    """, (timestamp, vehicle_type, direction, image_path))
+    INSERT INTO vehicle_logs (timestamp, vehicle_type, direction, plate, image_path)
+    VALUES (?, ?, ?, ?, ?)
+    """, (timestamp, vehicle_type, direction, plate, image_path))
 
     conn.commit()
     conn.close()
