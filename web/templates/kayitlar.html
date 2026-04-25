@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıtlar</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f1115;
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #161a22;
+            padding: 15px 30px;
+            border-bottom: 1px solid #2a2f3a;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-left img {
+            width: 42px;
+            height: 42px;
+        }
+
+        .navbar-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 15px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: #171b24;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #2b3140;
+        }
+
+        th {
+            color: #9aa3b2;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo">
+            <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
+        </div>
+
+        <div class="navbar-menu">
+            <a href="/dashboard">Ana Panel</a>
+            <a href="/kayitlar">Kayıtlar</a>
+            <a href="/raporlar">Raporlar</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Kayıt Geçmişi</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Saat</th>
+                        <th>Araç Görseli</th>
+                        <th>Plaka</th>
+                        <th>Giriş Amacı</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>14:15</td>
+                        <td>[Resim]</td>
+                        <td>61 AA 001</td>
+                        <td>Rektörlük Ziyareti</td>
+                        <td>✅ Kayıtlı</td>
+                    </tr>
+                    <tr>
+                        <td>14:22</td>
+                        <td>[Resim]</td>
+                        <td>34 ABC 123</td>
+                        <td>Misafir - Kütüphane</td>
+                        <td>✅ Kayıtlı</td>
+                    </tr>
+                    <tr>
+                        <td>14:31</td>
+                        <td>[Resim]</td>
+                        <td>55 XYZ 908</td>
+                        <td>Misafir - Öğrenci İşleri</td>
+                        <td>✅ Kayıtlı</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

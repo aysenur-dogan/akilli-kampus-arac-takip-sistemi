@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporlar</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f1115;
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #161a22;
+            padding: 15px 30px;
+            border-bottom: 1px solid #2a2f3a;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-left img {
+            width: 42px;
+            height: 42px;
+        }
+
+        .navbar-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 15px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: #171b24;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .report-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #005baa;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .report-box {
+            margin-top: 15px;
+            color: #9aa3b2;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo">
+            <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
+        </div>
+
+        <div class="navbar-menu">
+            <a href="/dashboard">Ana Panel</a>
+            <a href="/kayitlar">Kayıtlar</a>
+            <a href="/raporlar">Raporlar</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Raporlama Paneli</h2>
+            <button class="report-button">Günlük Raporu Excel Olarak İndir</button>
+            <div class="report-box">
+                Burada ileride günlük araç sayısı, plaka kayıtları ve giriş amaçları raporlanacak.
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Özet Bilgiler</h3>
+            <p>Bugünkü Toplam Araç Sayısı: 24</p>
+            <p>Başarılı Kayıt Sayısı: 24</p>
+            <p>Plakası Okunamayan Araç Sayısı: 2</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,22 +2,90 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giriş</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f1115;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 420px;
+            background: #1a1d24;
+            padding: 40px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.35);
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #b8bcc8;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #005baa;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #004a8a;
+        }
+    </style>
 </head>
-<body style="background-color:#111; color:white; text-align:center; font-family:Arial;">
+<body>
+    <div class="container">
+        <div class="login-box">
+            <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo" class="logo">
 
-    <div style="margin-top:100px;">
+            <h1>Akıllı Kampüs Araç Takip Sistemi</h1>
+            <p>Güvenlik Personeli Giriş Paneli</p>
 
-        <h1>Akıllı Kampüs Araç Takip Sistemi</h1>
+            <input type="text" placeholder="Kullanıcı Adı">
+            <input type="password" placeholder="Şifre">
 
-        <br>
-
-        <input type="text" placeholder="Kullanıcı Adı" style="padding:10px; width:250px;"><br><br>
-        <input type="password" placeholder="Şifre" style="padding:10px; width:250px;"><br><br>
-
-        <button style="padding:10px 20px; font-size:16px;">Sistemi Başlat</button>
-
+            <form action="/dashboard">
+    <button type="submit">Sistemi Başlat</button>
+</form>
+        </div>
     </div>
-
 </body>
 </html>
