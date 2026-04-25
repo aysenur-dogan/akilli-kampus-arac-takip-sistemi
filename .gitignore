@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+**/.venv/
+**/__pycache__/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# AI outputs
+ai/video.mp4
+ai/traffic.db
+ai/snapshots/
+ai/snapshots/*
+ai/yolov8n.pt
+
+# Web env
+web/.venv/
