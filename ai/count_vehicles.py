@@ -7,8 +7,10 @@ from datetime import datetime
 import os
 import re
 import easyocr
+from collections import Counter
 
 init_db()
+
 os.makedirs("snapshots", exist_ok=True)
 os.makedirs("plate_crops", exist_ok=True)
 
@@ -18,7 +20,7 @@ reader = easyocr.Reader(["en"])
 
 cap = cv2.VideoCapture("video.mp4")
 
-vehicle_classes = ["car", "bus", "truck", "motorcycle"]
+vehicle_classes = ["car", "bus", "truck"]
 
 with open("rois.json", "r", encoding="utf-8") as f:
     rois = json.load(f)
@@ -63,64 +65,42 @@ def format_plate(text):
     text = clean_text(text)
     matches = re.findall(r"\d{2}[A-Z]{1,3}\d{2,4}", text)
 
-    if matches:
-        plate = max(matches, key=len)
+    if not matches:
+        return "UNKNOWN"
 
-        if len(plate) > 8:
-            plate = plate[:8]
-
-        return plate
-
-    return "UNKNOWN"
-def fix_common_errors(plate):
-    if plate == "UNKNOWN":
-        return plate
-
-    # 1. İl kodu düzeltme (ilk 2 rakam)
-    if len(plate) >= 2:
-        il_kod = plate[:2]
-
-        # OCR hataları
-        replacements = {
-            "67": "61",
-            "65": "55",
-            "68": "61",
-            "69": "61"
-        }
-
-        if il_kod in replacements:
-            plate = replacements[il_kod] + plate[2:]
-
-    # 2. Harf-rakam karışıklığı
-    plate = plate.replace("O", "0")
-    plate = plate.replace("I", "1")
-    
-
-    return plate
-def fix_common_errors(plate):
-    if plate == "UNKNOWN":
-        return plate
-
-    if len(plate) >= 2:
-        il_kod = plate[:2]
-
-        replacements = {
-            "67": "61",
-            "65": "55",
-            "68": "61",
-            "69": "61"
-        }
-
-        if il_kod in replacements:
-            plate = replacements[il_kod] + plate[2:]
+    plate = max(matches, key=len)
 
     if len(plate) > 8:
         plate = plate[:8]
 
     return plate
 
-def plate_score(plate):
+
+def fix_common_errors(plate):
     if plate == "UNKNOWN":
+        return plate
+
+    replacements = {
+        "67": "61",
+        "65": "55",
+        "68": "61",
+        "69": "61"
+    }
+
+    if len(plate) >= 2 and plate[:2] in replacements:
+        plate = replacements[plate[:2]] + plate[2:]
+
+    if len(plate) > 8:
+        plate = plate[:8]
+
+    if len(plate) < 7:
+        return "UNKNOWN"
+
+    return plate
+
+
+def plate_score(plate):
+    if plate == "UNKNOWN" or plate == "":
         return -100
 
     score = 0
@@ -131,19 +111,31 @@ def plate_score(plate):
     if plate[:2].isdigit() and 1 <= int(plate[:2]) <= 81:
         score += 30
 
-    if 6 <= len(plate) <= 9:
+    if 7 <= len(plate) <= 8:
         score += 20
     else:
-        score -= 20
+        score -= 30
 
     return score
-
-
 def select_best_plate(candidates):
-    if not candidates:
+    filtered = [c for c in candidates if c not in ["", "UNKNOWN"]]
+
+    if not filtered:
         return "UNKNOWN"
 
-    return max(candidates, key=plate_score)
+    counter = Counter(filtered)
+
+    best_plate = "UNKNOWN"
+    best_value = -9999
+
+    for plate, freq in counter.items():
+        total_score = plate_score(plate) + (freq * 25)
+
+        if total_score > best_value:
+            best_value = total_score
+            best_plate = plate
+
+    return fix_common_errors(best_plate)
 
 
 def preprocess_plate(plate_crop):
@@ -199,7 +191,10 @@ def read_plate_from_vehicle(vehicle_crop, track_id, direction, filename_time):
         if prob > 0.10:
             plate_text += clean_text(text) + " "
 
-    return format_plate(plate_text)
+    plate = format_plate(plate_text)
+    plate = fix_common_errors(plate)
+
+    return plate
 
 
 def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
@@ -238,9 +233,11 @@ def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
 
         if plate_result != "UNKNOWN":
             plate_candidates.append(plate_result)
+        else:
+            plate_candidates.append("")
 
     plate = select_best_plate(plate_candidates)
-    plate = fix_common_errors(plate)
+
     print(f"{direction.upper()} sayildi:", cls_name, track_id)
     print("PLAKA:", plate)
 
@@ -317,7 +314,7 @@ while True:
 
             track_crops[track_id].append(vehicle_crop_for_buffer.copy())
 
-            if len(track_crops[track_id]) > 5:
+            if len(track_crops[track_id]) > 10:
                 track_crops[track_id].pop(0)
 
         label = f"{cls_name} ID:{track_id}"
