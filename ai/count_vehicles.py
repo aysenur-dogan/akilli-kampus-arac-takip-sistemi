@@ -72,7 +72,52 @@ def format_plate(text):
         return plate
 
     return "UNKNOWN"
+def fix_common_errors(plate):
+    if plate == "UNKNOWN":
+        return plate
 
+    # 1. İl kodu düzeltme (ilk 2 rakam)
+    if len(plate) >= 2:
+        il_kod = plate[:2]
+
+        # OCR hataları
+        replacements = {
+            "67": "61",
+            "65": "55",
+            "68": "61",
+            "69": "61"
+        }
+
+        if il_kod in replacements:
+            plate = replacements[il_kod] + plate[2:]
+
+    # 2. Harf-rakam karışıklığı
+    plate = plate.replace("O", "0")
+    plate = plate.replace("I", "1")
+    
+
+    return plate
+def fix_common_errors(plate):
+    if plate == "UNKNOWN":
+        return plate
+
+    if len(plate) >= 2:
+        il_kod = plate[:2]
+
+        replacements = {
+            "67": "61",
+            "65": "55",
+            "68": "61",
+            "69": "61"
+        }
+
+        if il_kod in replacements:
+            plate = replacements[il_kod] + plate[2:]
+
+    if len(plate) > 8:
+        plate = plate[:8]
+
+    return plate
 
 def plate_score(plate):
     if plate == "UNKNOWN":
@@ -195,7 +240,7 @@ def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
             plate_candidates.append(plate_result)
 
     plate = select_best_plate(plate_candidates)
-
+    plate = fix_common_errors(plate)
     print(f"{direction.upper()} sayildi:", cls_name, track_id)
     print("PLAKA:", plate)
 
