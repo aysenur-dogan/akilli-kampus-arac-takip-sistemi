@@ -5,8 +5,9 @@ import numpy as np
 from database import init_db, insert_log
 from datetime import datetime
 import os
-import easyocr
 import re
+import easyocr
+from collections import Counter
 
 init_db()
 
@@ -14,12 +15,12 @@ os.makedirs("snapshots", exist_ok=True)
 os.makedirs("plate_crops", exist_ok=True)
 
 vehicle_model = YOLO("yolov8n.pt")
-plate_model = YOLO("models/plate_detector.pt")
+plate_model = YOLO("models/plate_detector_v2.pt")
 reader = easyocr.Reader(["en"])
 
 cap = cv2.VideoCapture("video.mp4")
 
-vehicle_classes = ["car", "bus", "truck", "motorcycle"]
+vehicle_classes = ["car", "bus", "truck"]
 
 with open("rois.json", "r", encoding="utf-8") as f:
     rois = json.load(f)
@@ -64,10 +65,77 @@ def format_plate(text):
     text = clean_text(text)
     matches = re.findall(r"\d{2}[A-Z]{1,3}\d{2,4}", text)
 
-    if matches:
-        return max(matches, key=len)
+    if not matches:
+        return "UNKNOWN"
 
-    return "UNKNOWN"
+    plate = max(matches, key=len)
+
+    if len(plate) > 8:
+        plate = plate[:8]
+
+    return plate
+
+
+def fix_common_errors(plate):
+    if plate == "UNKNOWN":
+        return plate
+
+    replacements = {
+        "67": "61",
+        "65": "55",
+        "68": "61",
+        "69": "61"
+    }
+
+    if len(plate) >= 2 and plate[:2] in replacements:
+        plate = replacements[plate[:2]] + plate[2:]
+
+    if len(plate) > 8:
+        plate = plate[:8]
+
+    if len(plate) < 7:
+        return "UNKNOWN"
+
+    return plate
+
+
+def plate_score(plate):
+    if plate == "UNKNOWN" or plate == "":
+        return -100
+
+    score = 0
+
+    if re.fullmatch(r"\d{2}[A-Z]{1,3}\d{2,4}", plate):
+        score += 50
+
+    if plate[:2].isdigit() and 1 <= int(plate[:2]) <= 81:
+        score += 30
+
+    if 7 <= len(plate) <= 8:
+        score += 20
+    else:
+        score -= 30
+
+    return score
+def select_best_plate(candidates):
+    filtered = [c for c in candidates if c not in ["", "UNKNOWN"]]
+
+    if not filtered:
+        return "UNKNOWN"
+
+    counter = Counter(filtered)
+
+    best_plate = "UNKNOWN"
+    best_value = -9999
+
+    for plate, freq in counter.items():
+        total_score = plate_score(plate) + (freq * 25)
+
+        if total_score > best_value:
+            best_value = total_score
+            best_plate = plate
+
+    return fix_common_errors(best_plate)
 
 
 def preprocess_plate(plate_crop):
@@ -100,7 +168,7 @@ def read_plate_from_vehicle(vehicle_crop, track_id, direction, filename_time):
 
                 h, w = vehicle_crop.shape[:2]
 
-                pad = 10
+                pad = 12
                 x1 = max(0, x1 - pad)
                 y1 = max(0, y1 - pad)
                 x2 = min(w, x2 + pad)
@@ -114,34 +182,19 @@ def read_plate_from_vehicle(vehicle_crop, track_id, direction, filename_time):
     plate_crop_path = f"plate_crops/{direction.lower()}_{track_id}_{filename_time}.jpg"
     cv2.imwrite(plate_crop_path, best_plate_crop)
 
-    processed_plate = preprocess_plate(best_plate_crop)
-    ocr_results = reader.readtext(processed_plate)
+    processed = preprocess_plate(best_plate_crop)
+    easy_results = reader.readtext(processed)
 
     plate_text = ""
 
-    for bbox, text, prob in ocr_results:
-        cleaned = clean_text(text)
+    for _, text, prob in easy_results:
+        if prob > 0.10:
+            plate_text += clean_text(text) + " "
 
-        if prob > 0.10 and len(cleaned) >= 1:
-            plate_text += cleaned + " "
+    plate = format_plate(plate_text)
+    plate = fix_common_errors(plate)
 
-    return format_plate(plate_text)
-
-
-def select_best_plate(candidates):
-    if not candidates:
-        return "UNKNOWN"
-
-    valid_candidates = []
-
-    for plate in candidates:
-        if re.fullmatch(r"\d{2}[A-Z]{1,3}\d{2,4}", plate):
-            valid_candidates.append(plate)
-
-    if valid_candidates:
-        return max(valid_candidates, key=len)
-
-    return max(candidates, key=len)
+    return plate
 
 
 def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
@@ -180,6 +233,8 @@ def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
 
         if plate_result != "UNKNOWN":
             plate_candidates.append(plate_result)
+        else:
+            plate_candidates.append("")
 
     plate = select_best_plate(plate_candidates)
 
@@ -259,7 +314,7 @@ while True:
 
             track_crops[track_id].append(vehicle_crop_for_buffer.copy())
 
-            if len(track_crops[track_id]) > 5:
+            if len(track_crops[track_id]) > 10:
                 track_crops[track_id].pop(0)
 
         label = f"{cls_name} ID:{track_id}"
@@ -316,6 +371,7 @@ while True:
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
         cv2.circle(frame, center, 4, (0, 0, 255), -1)
+
         cv2.putText(
             frame,
             label,

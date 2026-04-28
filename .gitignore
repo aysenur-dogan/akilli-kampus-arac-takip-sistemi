@@ -1,3 +1,10 @@
+≈y
+ai/plate_crops/
+ai/snapshots/
+ai/DEBUG_plate_*.jpg
+ai/*.db
+*.mp4
+*.avi
 # Python
 __pycache__/
 *.pyc
