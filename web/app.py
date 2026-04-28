@@ -28,8 +28,17 @@ conn.close()
 
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username == "admin" and password == "1234":
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("login.html", error="Kullanıcı adı veya şifre yanlış")
+
     return render_template("login.html")
 
 @app.route("/dashboard")

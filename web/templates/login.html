@@ -79,11 +79,17 @@
             <h1>Akıllı Kampüs Araç Takip Sistemi</h1>
             <p>Güvenlik Personeli Giriş Paneli</p>
 
-            <input type="text" placeholder="Kullanıcı Adı">
-            <input type="password" placeholder="Şifre">
+          <form method="POST">
 
-            <form action="/dashboard">
+    {% if error %}
+    <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <input type="text" name="username" placeholder="Kullanıcı Adı">
+    <input type="password" name="password" placeholder="Şifre">
+
     <button type="submit">Sistemi Başlat</button>
+
 </form>
         </div>
     </div>
