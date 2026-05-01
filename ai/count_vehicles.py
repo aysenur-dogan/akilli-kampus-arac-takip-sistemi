@@ -27,7 +27,8 @@ with open("rois.json", "r", encoding="utf-8") as f:
 
 with open("count_lines.json", "r", encoding="utf-8") as f:
     lines = json.load(f)
-
+with open("plate_corrections.json", "r", encoding="utf-8") as f:
+    plate_corrections = json.load(f)
 gelis_poly = np.array(rois["Gelis Yolu"], np.int32)
 gidis_poly = np.array(rois["Gidis Yolu"], np.int32)
 
@@ -135,7 +136,9 @@ def select_best_plate(candidates):
             best_value = total_score
             best_plate = plate
 
-    return fix_common_errors(best_plate)
+    best_plate = fix_common_errors(best_plate)
+    best_plate = plate_corrections.get(best_plate, best_plate)
+    return best_plate
 
 
 def preprocess_plate(plate_crop):
@@ -168,7 +171,7 @@ def read_plate_from_vehicle(vehicle_crop, track_id, direction, filename_time):
 
                 h, w = vehicle_crop.shape[:2]
 
-                pad = 12
+                pad = 20
                 x1 = max(0, x1 - pad)
                 y1 = max(0, y1 - pad)
                 x2 = min(w, x2 + pad)
@@ -182,19 +185,54 @@ def read_plate_from_vehicle(vehicle_crop, track_id, direction, filename_time):
     plate_crop_path = f"plate_crops/{direction.lower()}_{track_id}_{filename_time}.jpg"
     cv2.imwrite(plate_crop_path, best_plate_crop)
 
-    processed = preprocess_plate(best_plate_crop)
-    easy_results = reader.readtext(processed)
+    candidates = []
 
-    plate_text = ""
-
-    for _, text, prob in easy_results:
+    # 1) Orijinal crop
+    results1 = reader.readtext(best_plate_crop)
+    text1 = ""
+    for _, text, prob in results1:
         if prob > 0.10:
-            plate_text += clean_text(text) + " "
+            text1 += clean_text(text) + " "
+    candidates.append(format_plate(text1))
 
-    plate = format_plate(plate_text)
-    plate = fix_common_errors(plate)
+    # 2) Gri + büyütülmüş
+    gray = cv2.cvtColor(best_plate_crop, cv2.COLOR_BGR2GRAY)
+    big = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+    results2 = reader.readtext(big)
+    text2 = ""
+    for _, text, prob in results2:
+        if prob > 0.10:
+            text2 += clean_text(text) + " "
+    candidates.append(format_plate(text2))
 
-    return plate
+    # 3) Threshold
+    _, thresh = cv2.threshold(big, 120, 255, cv2.THRESH_BINARY)
+    results3 = reader.readtext(thresh)
+    text3 = ""
+    for _, text, prob in results3:
+        if prob > 0.10:
+            text3 += clean_text(text) + " "
+    candidates.append(format_plate(text3))
+
+    # 4) Ters threshold
+    inv = cv2.bitwise_not(thresh)
+    results4 = reader.readtext(inv)
+    text4 = ""
+    for _, text, prob in results4:
+        if prob > 0.10:
+            text4 += clean_text(text) + " "
+    candidates.append(format_plate(text4))
+
+    candidates = [
+    plate_corrections.get(fix_common_errors(c), fix_common_errors(c))
+    for c in candidates
+    if c != "UNKNOWN"
+]
+
+    if not candidates:
+        return "UNKNOWN"
+
+    return select_best_plate(candidates)
 
 
 def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
@@ -237,6 +275,7 @@ def save_vehicle_and_log(frame, x1, y1, x2, y2, cls_name, direction, track_id):
             plate_candidates.append("")
 
     plate = select_best_plate(plate_candidates)
+    plate = plate_corrections.get(plate, plate)
 
     print(f"{direction.upper()} sayildi:", cls_name, track_id)
     print("PLAKA:", plate)

@@ -25,3 +25,21 @@ ai/yolov8n.pt
 
 # Web env
 web/.venv/
+# Python
+__pycache__/
+*.pyc
+
+# Mac
+.DS_Store
+
+# Data
+plate_crops/
+snapshots/
+*.db
+
+# Video
+*.mp4
+
+# Model ağırlıkları (isteğe bağlı)
+*.pt
+*.pth
