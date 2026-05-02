@@ -69,37 +69,91 @@
             margin-top: 15px;
             color: #9aa3b2;
         }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: #0d0f14;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-title {
+            color: #9aa3b2;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .green { color: #2ecc71; }
+        .red { color: #e74c3c; }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-left">
-            <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo">
-            <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
-        </div>
 
-        <div class="navbar-menu">
-            <a href="/dashboard">Ana Panel</a>
-            <a href="/kayitlar">Kayıtlar</a>
-            <a href="/raporlar">Raporlar</a>
+<div class="navbar">
+    <div class="navbar-left">
+        <img src="{{ url_for('static', filename='ktu_logo.png') }}">
+        <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
+    </div>
+
+    <div class="navbar-menu">
+        <a href="/dashboard">Ana Panel</a>
+        <a href="/kayitlar">Kayıtlar</a>
+        <a href="/raporlar">Raporlar</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Raporlama Paneli</h2>
+
+        <a href="/rapor-indir">
+    <button class="report-button">
+        Günlük Raporu Excel Olarak İndir
+    </button>
+</a>
+
+        <div class="report-box">
+            Günlük araç sayısı, plaka kayıtları ve giriş amaçları burada analiz edilir.
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h2>Raporlama Paneli</h2>
-            <button class="report-button">Günlük Raporu Excel Olarak İndir</button>
-            <div class="report-box">
-                Burada ileride günlük araç sayısı, plaka kayıtları ve giriş amaçları raporlanacak.
+    <div class="card">
+        <h3>Özet Bilgiler</h3>
+
+        <div class="stats">
+
+            <div class="stat-box">
+                <div class="stat-title">Toplam Araç</div>
+                <div class="stat-value">{{ total_count }}</div>
             </div>
-        </div>
 
-        <div class="card">
-            <h3>Özet Bilgiler</h3>
-            <p>Bugünkü Toplam Araç Sayısı: 24</p>
-            <p>Başarılı Kayıt Sayısı: 24</p>
-            <p>Plakası Okunamayan Araç Sayısı: 2</p>
+            <div class="stat-box">
+                <div class="stat-title">Başarılı Okuma</div>
+                <div class="stat-value green">{{ success_count }}</div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-title">Okunamayan</div>
+                <div class="stat-value red">{{ unknown_count }}</div>
+            </div>
+
         </div>
     </div>
+
+</div>
+
 </body>
 </html>

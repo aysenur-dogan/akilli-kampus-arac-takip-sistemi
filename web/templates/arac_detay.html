@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Araç Detay</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f1115;
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #161a22;
+            padding: 15px 30px;
+            border-bottom: 1px solid #2a2f3a;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 25px;
+        }
+
+        .card {
+    background: #171b24;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+        .big-img {
+    max-width: 600px;
+    width: 100%;
+    border-radius: 14px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #2b3140;
+            text-align: left;
+        }
+
+        th {
+            color: #9aa3b2;
+        }
+
+        .thumb {
+            width: 100px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 40px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+        }
+
+        .modal img {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 12px;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            font-size: 40px;
+            cursor: pointer;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="navbar">
+    <h2>Akıllı Kampüs Araç Takip Sistemi</h2>
+    <div>
+        <a href="/dashboard">Ana Panel</a>
+        <a href="/kayitlar">Kayıtlar</a>
+        <a href="/raporlar">Raporlar</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Plaka Detayı: {{ plate }}</h2>
+
+        {% if last_record and last_record.image_path %}
+            <img class="big-img"
+                 onclick="openModal(this.src)"
+                 src="{{ url_for('static', filename='snapshots/' + last_record.image_path.split('/')[-1]) }}">
+        {% else %}
+            <p>Bu araç için görsel bulunamadı.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Geçmiş Giriş / Çıkış Kayıtları</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tarih-Saat</th>
+                    <th>Yön</th>
+                    <th>Giriş Amacı</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <tr>
+    <td>{{ record.timestamp }}</td>
+    <td>{{ record.direction }}</td>
+    <td>{{ record.visit_reason if record.visit_reason else "Belirtilmedi" }}</td>
+    <td>Kayıtlı</td>
+</tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div id="imgModal" class="modal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img id="modalImg">
+</div>
+
+<script>
+function openModal(src) {
+    document.getElementById("imgModal").style.display = "block";
+    document.getElementById("modalImg").src = src;
+}
+
+function closeModal() {
+    document.getElementById("imgModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>

@@ -4,12 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background: #0f1115;
             color: white;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 700px;
+            height: 700px;
+            background: url("/static/ktu_logo.png") no-repeat center;
+            background-size: contain;
+            transform: translate(-50%, -50%);
+            opacity: 0.07;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .navbar,
+        .main-container {
+            position: relative;
+            z-index: 1;
         }
 
         .navbar {
@@ -37,11 +59,16 @@
             font-weight: bold;
         }
 
-        .navbar-menu a {
+        .navbar-menu a,
+        .navbar-menu span {
             color: white;
             text-decoration: none;
             margin-left: 20px;
             font-size: 15px;
+        }
+
+        .navbar-menu a:hover {
+            color: #9fdcff;
         }
 
         .main-container {
@@ -56,18 +83,22 @@
 
         .left-panel {
             flex: 2;
-            background: #171b24;
+            background: rgba(23, 27, 36, 0.82);
+            backdrop-filter: blur(6px);
             border-radius: 16px;
             padding: 20px;
             min-height: 420px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .right-panel {
             flex: 1;
-            background: #171b24;
+            background: rgba(23, 27, 36, 0.82);
+            backdrop-filter: blur(6px);
             border-radius: 16px;
             padding: 20px;
             min-height: 420px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .video-box {
@@ -80,10 +111,17 @@
             justify-content: center;
             color: #9aa3b2;
             margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .video-box video {
+            width: 100%;
+            height: 280px;
+            object-fit: contain;
         }
 
         .counter-box {
-            background: #0d0f14;
+            background: rgba(13, 15, 20, 0.88);
             border-radius: 14px;
             padding: 20px;
             text-align: center;
@@ -92,12 +130,12 @@
         .counter-number {
             font-size: 42px;
             font-weight: bold;
-            color: #2ea8ff;
+            color: #9fdcff;
             margin-top: 10px;
         }
 
         .info-card {
-            background: #0d0f14;
+            background: rgba(13, 15, 20, 0.88);
             border-radius: 14px;
             padding: 16px;
         }
@@ -111,6 +149,13 @@
             justify-content: center;
             color: #9aa3b2;
             margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .vehicle-image img {
+            max-width: 100%;
+            max-height: 160px;
+            border-radius: 12px;
         }
 
         .info-item {
@@ -148,16 +193,19 @@
             padding: 12px;
             border: none;
             border-radius: 10px;
-            background: #005baa;
-            color: white;
+            background: #9fdcff;
+            color: #0f1115;
             font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
         }
 
         .bottom-section {
-            background: #171b24;
+            background: rgba(23, 27, 36, 0.82);
+            backdrop-filter: blur(6px);
             border-radius: 16px;
             padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         table {
@@ -180,105 +228,243 @@
         td {
             font-size: 14px;
         }
+
+        tr {
+            transition: 0.2s;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        td img {
+            border-radius: 8px;
+        }
     </style>
 </head>
+
 <body>
-    <div class="navbar">
-        <div class="navbar-left">
-            <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo">
-            <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
-        </div>
 
-      <div class="navbar-menu">
-    <a href="/dashboard">Ana Panel</a>
-    <a href="/kayitlar">Kayıtlar</a>
-    <a href="/yeni-kayit">Yeni Kayıt</a>
-    <a href="/raporlar">Raporlar</a>
-    <a href="#">19.04.2026 | 15:30</a>
-</div>
+<div class="navbar">
+    <div class="navbar-left">
+        <img src="{{ url_for('static', filename='ktu_logo.png') }}" alt="KTÜ Logo">
+        <div class="navbar-title">Akıllı Kampüs Araç Takip Sistemi</div>
     </div>
 
-    <div class="main-container">
-        <div class="top-section">
-            <div class="left-panel">
-                <h2>Canlı İzleme ve Tespit Alanı</h2>
-
-                <div class="video-box">
-    <video width="100%" height="280" controls>
-        <source src="{{ url_for('static', filename='video.mp4') }}" type="video/mp4">
-        Tarayıcınız video oynatmayı desteklemiyor.
-    </video>
-</div>
-
-                <div class="counter-box">
-    <div>Bugün Tespit Edilen Araç Sayısı</div>
-    <div class="counter-number">24</div>
-    <div style="margin-top:12px; color:#9aa3b2;">Son Algılama: 14:22</div>
-</div>
-
-            <div class="right-panel">
-                <h2>Son Tespit Bilgi Kartı</h2>
-
-                <div class="info-card">
-                    <div class="vehicle-image">
-    <div style="text-align:center;">
-        <div style="font-size:16px;">🚗 Araç Görseli</div>
-        <div style="font-size:13px; color:#9aa3b2; margin-top:8px;">Algılanan son araç burada gösterilecek</div>
+    <div class="navbar-menu">
+        <a href="/dashboard">Ana Panel</a>
+        <a href="/kayitlar">Kayıtlar</a>
+        <a href="/yeni-kayit">Yeni Kayıt</a>
+        <a href="/raporlar">Raporlar</a>
+        <span id="live-clock"></span>
     </div>
 </div>
 
-                    <div class="info-item">
-                        <div class="info-label">Plaka</div>
-                        <div class="info-value">61 KTÜ 61</div>
-                    </div>
+<div class="main-container">
 
-                    <div class="info-item">
-                        <div class="info-label">Giriş Amacı</div>
-                        <div class="info-value">Rektörlük Ziyareti</div>
-                    </div>
+    <div class="top-section">
 
-                    <div class="info-item">
-    <div class="info-label">Durum</div>
-    <div class="info-value">✅ Başarıyla Kaydedildi</div>
-</div>
+        <div class="left-panel">
+            <h2>Canlı İzleme ve Tespit Alanı</h2>
 
+            <div class="video-box">
+                <video controls muted>
+                    <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
+                    Tarayıcınız video oynatmayı desteklemiyor.
+                </video>
+            </div>
 
-                    <div class="recording-box">
-                        <div class="record-dot"></div>
-                        <span>KAYITTA</span>
-                    </div>
+            <div class="counter-box">
+                <div>Bugün Tespit Edilen Araç Sayısı</div>
+                <div class="counter-number" id="total-count">{{ total_count }}</div>
 
-                    <button class="mic-button">Mikrofonu Başlat</button>
+                <div style="margin-top:12px; color:#9aa3b2;">
+                    Son Algılama:
+                    <span id="last-detection">
+                        {% if last_record %}
+                            {{ last_record.timestamp }}
+                        {% else %}
+                            Yok
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="bottom-section">
-            <h2>Kayıt Geçmişi</h2>
+        <div class="right-panel">
+            <h2>Son Tespit Bilgi Kartı</h2>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Saat</th>
-                        <th>Araç Görseli</th>
-                        <th>Plaka</th>
-                        <th>Giriş Amacı</th>
-                        <th>Durum</th>
-                    </tr>
-                </thead>
-                <tbody>
-    {% for record in records %}
-    <tr>
-        <td>{{ record.timestamp }}</td>
-        <td>[Resim]</td>
-        <td>{{ record.plate }}</td>
-        <td>{{ record.visit_text }}</td>
-        <td>{{ record.status }}</td>
-    </tr>
-    {% endfor %}
-</tbody>
-            </table>
+            <div class="info-card">
+
+                <div class="vehicle-image" id="last-image-box">
+                    {% if last_record and last_record.image_path %}
+                        <img src="{{ url_for('static', filename='snapshots/' + last_record.image_path.split('/')[-1]) }}">
+                    {% else %}
+                        <div style="text-align:center;">
+                            <div style="font-size:16px;">Araç Görseli</div>
+                            <div style="font-size:13px; color:#9aa3b2; margin-top:8px;">Henüz kayıt yok</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Plaka</div>
+                    <div class="info-value" id="last-plate">
+                        {{ last_record.plate if last_record else "Kayıt yok" }}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Giriş Amacı</div>
+                    <div class="info-value" id="last-visit">
+                        {{ last_record.visit_reason if last_record and last_record.visit_reason else "Belirtilmedi" }}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Durum</div>
+                    <div class="info-value">
+                        {% if last_record %}
+                            ✅ Başarıyla Kaydedildi
+                        {% else %}
+                            Kayıt yok
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="recording-box">
+                    <div class="record-dot"></div>
+                    <span>KAYITTA</span>
+                </div>
+
+                <button class="mic-button">Mikrofonu Başlat</button>
+            </div>
         </div>
+
     </div>
+
+    <div class="bottom-section">
+        <h2>Kayıt Geçmişi</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Saat</th>
+                    <th>Araç Görseli</th>
+                    <th>Plaka</th>
+                    <th>Giriş Amacı</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+
+            <tbody id="records-body">
+                {% for record in records %}
+                <tr onclick="window.location='/arac/{{ record.plate }}'" style="cursor:pointer;" data-id="{{ record.id }}">
+                    <td>{{ record.timestamp }}</td>
+
+                    <td>
+                        {% if record.image_path %}
+                            <img src="{{ url_for('static', filename='snapshots/' + record.image_path.split('/')[-1]) }}" width="100">
+                        {% else %}
+                            Resim yok
+                        {% endif %}
+                    </td>
+
+                    <td>{{ record.plate }}</td>
+                    <td>{{ record.visit_reason if record.visit_reason else "Belirtilmedi" }}</td>
+                    <td>✅ Kayıtlı</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function updateClock() {
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    document.getElementById("live-clock").innerText =
+        `${day}.${month}.${year} | ${hours}:${minutes}:${seconds}`;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+<script>
+let lastId = 0;
+
+document.querySelectorAll("#records-body tr").forEach(row => {
+    const id = Number(row.dataset.id);
+    if (id > lastId) {
+        lastId = id;
+    }
+});
+
+async function loadNewRecords() {
+    const response = await fetch(`/api/new-records?last_id=${lastId}`);
+    const records = await response.json();
+
+    if (records.length === 0) return;
+
+    const tbody = document.getElementById("records-body");
+
+    records.forEach(record => {
+        const imgHtml = record.image_url
+            ? `<img src="${record.image_url}" width="100" style="border-radius:8px;">`
+            : "Resim yok";
+
+        const row = document.createElement("tr");
+        row.style.cursor = "pointer";
+        row.dataset.id = record.id;
+
+        row.onclick = () => {
+            window.location = "/arac/" + record.plate;
+        };
+
+        row.innerHTML = `
+            <td>${record.timestamp}</td>
+            <td>${imgHtml}</td>
+            <td>${record.plate}</td>
+            <td>${record.visit_reason}</td>
+            <td>✅ Kayıtlı</td>
+        `;
+
+        row.style.background = "rgba(159, 220, 255, 0.18)";
+        setTimeout(() => {
+            row.style.background = "";
+        }, 2000);
+
+        tbody.prepend(row);
+
+        document.getElementById("last-detection").innerText = record.timestamp;
+        document.getElementById("last-plate").innerText = record.plate;
+        document.getElementById("last-visit").innerText = record.visit_reason;
+
+        if (record.image_url) {
+            document.getElementById("last-image-box").innerHTML =
+                `<img src="${record.image_url}">`;
+        }
+
+        const total = document.getElementById("total-count");
+        total.innerText = Number(total.innerText) + 1;
+
+        lastId = record.id;
+    });
+}
+
+setInterval(loadNewRecords, 1000);
+</script>
+
 </body>
 </html>

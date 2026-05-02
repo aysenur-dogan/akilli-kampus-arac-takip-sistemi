@@ -1,4 +1,5 @@
-≈y
+ai/real_plates/
+ai/real_plates_good/≈y
 ai/plate_crops/
 ai/snapshots/
 ai/DEBUG_plate_*.jpg
@@ -43,3 +44,10 @@ snapshots/
 # Model ağırlıkları (isteğe bağlı)
 *.pt
 *.pth
+ai/*.db
+
+web/static/videos/
+
+web/static/snapshots/
+
+web/*.db

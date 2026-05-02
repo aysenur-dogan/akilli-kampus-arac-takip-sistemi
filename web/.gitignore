@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+.DS_Store
+
+# videolar
+static/videos/
+
+# snapshot görselleri
+static/snapshots/

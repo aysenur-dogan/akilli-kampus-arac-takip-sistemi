@@ -75,6 +75,7 @@
             font-size: 14px;
         }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="navbar">
@@ -105,28 +106,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>14:15</td>
-                        <td>[Resim]</td>
-                        <td>61 AA 001</td>
-                        <td>Rektörlük Ziyareti</td>
-                        <td>✅ Kayıtlı</td>
-                    </tr>
-                    <tr>
-                        <td>14:22</td>
-                        <td>[Resim]</td>
-                        <td>34 ABC 123</td>
-                        <td>Misafir - Kütüphane</td>
-                        <td>✅ Kayıtlı</td>
-                    </tr>
-                    <tr>
-                        <td>14:31</td>
-                        <td>[Resim]</td>
-                        <td>55 XYZ 908</td>
-                        <td>Misafir - Öğrenci İşleri</td>
-                        <td>✅ Kayıtlı</td>
-                    </tr>
-                </tbody>
+    {% for record in records %}
+    <tr>
+        <td>{{ record.timestamp }}</td>
+
+        <td>
+            {% if record.image_path %}
+                <img src="{{ url_for('static', filename='snapshots/' + record.image_path.split('/')[-1]) }}"
+                     width="100"
+                     style="border-radius:8px;">
+            {% else %}
+                Resim yok
+            {% endif %}
+        </td>
+
+        <td>{{ record.plate }}</td>
+
+        <td>
+            {{ record.visit_reason if record.visit_reason else "Belirtilmedi" }}
+        </td>
+
+        <td>✅ Kayıtlı</td>
+    </tr>
+    {% endfor %}
+</tbody>
             </table>
         </div>
     </div>
