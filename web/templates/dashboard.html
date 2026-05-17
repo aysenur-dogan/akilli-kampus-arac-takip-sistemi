@@ -267,13 +267,28 @@
         <div class="left-panel">
             <h2>Canlı İzleme ve Tespit Alanı</h2>
 
-            <div class="video-box">
-                <video controls muted>
-                    <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
-                    Tarayıcınız video oynatmayı desteklemiyor.
-                </video>
-            </div>
+            <div class="video-box" style="position:relative;">
 
+    <button onclick="openFullscreen()"
+        style="
+        position:absolute;
+        top:12px;
+        right:12px;
+        z-index:10;
+        background:#0f1724;
+        color:white;
+        border:none;
+        padding:8px 12px;
+        border-radius:8px;
+        cursor:pointer;">
+        ⛶ Tam Ekran
+    </button>
+
+    <img id="live-frame"
+         ondblclick="openFullscreen()"
+         src="{{ url_for('static', filename='live/current.jpg') }}"
+         style="width:100%; height:430px; object-fit:contain; border-radius:12px;">
+</div>
             <div class="counter-box">
                 <div>Bugün Tespit Edilen Araç Sayısı</div>
                 <div class="counter-number" id="total-count">{{ total_count }}</div>
@@ -337,7 +352,11 @@
                     <span>KAYITTA</span>
                 </div>
 
-                <button class="mic-button">Mikrofonu Başlat</button>
+                <button class="mic-button" onclick="startSpeech()">Mikrofonu Başlat</button>
+
+<div id="speech-result" style="margin-top:10px; color:#9fdcff; font-weight:bold;">
+    Sesli giriş bekleniyor...
+</div>
             </div>
         </div>
 
@@ -465,6 +484,79 @@ async function loadNewRecords() {
 
 setInterval(loadNewRecords, 1000);
 </script>
+<script>
+setInterval(() => {
+    const img = document.getElementById("live-frame");
+    img.src = "/static/live/current.jpg?t=" + new Date().getTime();
+}, 500);
+</script>
+<script>
+function openFullscreen() {
+    const img = document.getElementById("live-frame");
 
+    if (img.requestFullscreen) {
+        img.requestFullscreen();
+    } else if (img.webkitRequestFullscreen) {
+        img.webkitRequestFullscreen();
+    } else if (img.msRequestFullscreen) {
+        img.msRequestFullscreen();
+    }
+}
+
+setInterval(() => {
+    const img = document.getElementById("live-frame");
+    img.src = "/static/live/current.jpg?t=" + new Date().getTime();
+}, 200);
+</script>   
+<script>
+function startSpeech() {
+    const resultBox = document.getElementById("speech-result");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        resultBox.innerText = "Bu tarayıcı ses tanımayı desteklemiyor. Chrome ile deneyin.";
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "tr-TR";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    resultBox.innerText = "Dinleniyor...";
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+
+        resultBox.innerText = "Algılandı: " + text;
+
+        fetch("/api/son-kayit-guncelle", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                visit_text: text
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            resultBox.innerText = "Kaydedildi: " + text;
+
+            setTimeout(() => {
+                location.reload();
+            }, 700);
+        });
+    };
+
+    recognition.onerror = function(event) {
+        resultBox.innerText = "Ses algılama hatası: " + event.error;
+    };
+}
+</script>
 </body>
 </html>

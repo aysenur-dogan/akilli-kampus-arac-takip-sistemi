@@ -51,3 +51,6 @@ web/static/videos/
 web/static/snapshots/
 
 web/*.db
+ai/real_plates_good/
+web/static/live/
+web/static/live/current.jpg

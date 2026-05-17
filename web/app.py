@@ -233,5 +233,38 @@ def api_records():
         })
 
     return jsonify(data)
+@app.route("/api/son-kayit-guncelle", methods=["POST"])
+def son_kayit_guncelle():
+    data = request.json
+    visit_text = data.get("visit_text", "Belirtilmedi")
+
+    conn = get_db_connection()
+
+    last_record = conn.execute("""
+        SELECT id FROM vehicle_records
+        ORDER BY id DESC
+        LIMIT 1
+    """).fetchone()
+
+    if last_record:
+        conn.execute("""
+            UPDATE vehicle_records
+            SET visit_text = ?
+            WHERE id = ?
+        """, (visit_text, last_record["id"]))
+
+        conn.commit()
+        conn.close()
+
+        return {
+            "message": "Son kayıt güncellendi",
+            "visit_text": visit_text
+        }
+
+    conn.close()
+
+    return {
+        "message": "Güncellenecek kayıt bulunamadı"
+    }
 if __name__ == "__main__":
     app.run(debug=True)

@@ -10,7 +10,10 @@ import easyocr
 from collections import Counter
 
 init_db()
+LIVE_DIR = "../web/static/live"
+LIVE_FRAME_PATH = "../web/static/live/current.jpg"
 
+os.makedirs(LIVE_DIR, exist_ok=True)
 os.makedirs("snapshots", exist_ok=True)
 os.makedirs("plate_crops", exist_ok=True)
 
@@ -441,10 +444,13 @@ while True:
         2
     )
 
-    cv2.imshow("Vehicle Counting", frame)
+    live_frame = cv2.resize(frame, (1280, 720))
+    cv2.imwrite(LIVE_FRAME_PATH, live_frame)
+
+    #cv2.imshow("Vehicle Counting", live_frame)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+     break
 
 cap.release()
 cv2.destroyAllWindows()
