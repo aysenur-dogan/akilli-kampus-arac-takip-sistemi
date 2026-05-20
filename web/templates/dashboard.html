@@ -340,7 +340,7 @@
                     <div class="info-label">Durum</div>
                     <div class="info-value">
                         {% if last_record %}
-                            ✅ Başarıyla Kaydedildi
+                             Başarıyla Kaydedildi
                         {% else %}
                             Kayıt yok
                         {% endif %}
@@ -485,10 +485,7 @@ async function loadNewRecords() {
 setInterval(loadNewRecords, 1000);
 </script>
 <script>
-setInterval(() => {
-    const img = document.getElementById("live-frame");
-    img.src = "/static/live/current.jpg?t=" + new Date().getTime();
-}, 500);
+
 </script>
 <script>
 function openFullscreen() {
@@ -547,10 +544,19 @@ function startSpeech() {
         .then(data => {
             resultBox.innerText = "Kaydedildi: " + text;
 
-            setTimeout(() => {
-                location.reload();
-            }, 700);
-        });
+            document.getElementById("last-visit").innerText = text;
+
+            
+            const firstRow = document.querySelector("#records-body tr");
+
+            if (firstRow) {
+                const visitCell = firstRow.children[3];
+
+            if (visitCell) {
+                visitCell.innerText = text;
+            }
+        }
+});
     };
 
     recognition.onerror = function(event) {

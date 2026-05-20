@@ -241,15 +241,15 @@ def son_kayit_guncelle():
     conn = get_db_connection()
 
     last_record = conn.execute("""
-        SELECT id FROM vehicle_records
+        SELECT id FROM vehicle_logs
         ORDER BY id DESC
         LIMIT 1
     """).fetchone()
 
     if last_record:
         conn.execute("""
-            UPDATE vehicle_records
-            SET visit_text = ?
+            UPDATE vehicle_logs
+            SET visit_reason = ?
             WHERE id = ?
         """, (visit_text, last_record["id"]))
 
@@ -266,5 +266,42 @@ def son_kayit_guncelle():
     return {
         "message": "Güncellenecek kayıt bulunamadı"
     }
+@app.route("/api/new-records")
+def api_new_records():
+    sync_snapshots()
+
+    last_id = request.args.get("last_id", 0, type=int)
+
+    conn = get_db_connection()
+
+    records = conn.execute("""
+        SELECT *
+        FROM vehicle_logs
+        WHERE id > ?
+        ORDER BY id ASC
+    """, (last_id,)).fetchall()
+
+    conn.close()
+
+    data = []
+
+    for r in records:
+        image_url = ""
+
+        if r["image_path"]:
+            image_name = r["image_path"].split("/")[-1]
+            image_url = url_for("static", filename="snapshots/" + image_name)
+
+        data.append({
+            "id": r["id"],
+            "timestamp": r["timestamp"],
+            "plate": r["plate"],
+            "vehicle_type": r["vehicle_type"],
+            "direction": r["direction"],
+            "visit_reason": r["visit_reason"] if r["visit_reason"] else "Belirtilmedi",
+            "image_url": image_url
+        })
+
+    return jsonify(data)
 if __name__ == "__main__":
     app.run(debug=True)
